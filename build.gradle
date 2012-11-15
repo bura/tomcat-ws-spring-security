@@ -1,0 +1,73 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'war'
+apply plugin: 'tomcat'
+
+group = 'org.bura'
+version = '0.0.1'
+
+sourceCompatibility = '1.7'
+targetCompatibility = '1.7'
+
+project.ext.set('springVersion', '3.2.+')
+project.ext.set('springSecurityVersion', '3.+')
+project.ext.set('thymeleafVersion', '2.+')
+project.ext.set('tomcatVersion', '7.+')
+project.ext.set('slf4jVersion', '1.+')
+project.ext.set('logbackVersion', '1.+')
+
+dependencies {
+	providedCompile "org.apache.tomcat:tomcat-catalina:${tomcatVersion}"
+	providedCompile "org.apache.tomcat:tomcat-coyote:${tomcatVersion}"
+	
+	compile "org.slf4j:slf4j-api:${slf4jVersion}"
+	compile "org.slf4j:jcl-over-slf4j:${slf4jVersion}"
+	compile "org.slf4j:log4j-over-slf4j:${slf4jVersion}"
+	compile "ch.qos.logback:logback-core:${logbackVersion}"
+	compile "ch.qos.logback:logback-classic:${logbackVersion}"
+	
+	compile "org.springframework:spring-webmvc:${springVersion}"
+	compile "org.springframework.security:spring-security-web:${springSecurityVersion}"
+	compile "org.springframework.security:spring-security-config:${springSecurityVersion}"
+	compile "org.thymeleaf:thymeleaf-spring3:${thymeleafVersion}"
+
+	tomcat("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+			"org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
+	tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
+		exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+	}
+}
+
+configurations {
+	compile.exclude module: 'commons-logging'
+}
+
+repositories {
+	mavenCentral()
+	mavenRepo url: 'http://maven.springframework.org/milestone'
+}
+
+[
+    tomcatRun,
+    tomcatRunWar,
+    tomcatStop
+]*.stopKey = 'stopKey'
+
+buildscript {
+    repositories {
+		mavenCentral()
+        add(new org.apache.ivy.plugins.resolver.URLResolver()) {
+            name = 'GitHub'
+            addArtifactPattern 'http://cloud.github.com/downloads/[organisation]/[module]/[module]-[revision].[ext]'
+        }
+    }
+
+    dependencies { 
+		classpath 'bmuschko:gradle-tomcat-plugin:0.9.2'
+		classpath 'de.flapdoodle.embedmongo:de.flapdoodle.embedmongo:1.+'
+	}
+}
+
+uploadArchives {
+	repositories { flatDir { dirs 'repos' } }
+}
