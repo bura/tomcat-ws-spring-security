@@ -15,11 +15,7 @@
 	}
 
 	function connect() {
-		var target = document.getElementById('target').value;
-		if (target == '') {
-			alert('Invalid target');
-			return;
-		}
+		var target = document.getElementById('targetUri').value;
 		if ('WebSocket' in window) {
 			ws = new WebSocket(target);
 		} else if ('MozWebSocket' in window) {
@@ -59,16 +55,6 @@
 		}
 	}
 
-	function updateTarget(target) {
-		if (window.location.protocol == 'http:') {
-			document.getElementById('target').value = 'ws://'
-					+ window.location.host + target;
-		} else {
-			document.getElementById('target').value = 'wss://'
-					+ window.location.host + target;
-		}
-	}
-
 	function log(message) {
 		var console = document.getElementById('console');
 		var p = document.createElement('p');
@@ -85,25 +71,22 @@
 </head>
 <body>
 
-	<div align="right">
+	<input id="targetUri" th:value="@{/ws}" hidden="true" />
+	<script type="text/javascript">
+		var str;
+		if (window.location.protocol == 'http:') {
+			str = 'ws://';
+		} else {
+			str = 'wss://';
+		}
+		str = str + window.location.host
+				+ document.getElementById('targetUri').value;
+		document.getElementById('targetUri').value = str;
+	</script>
+
+	<div style="float: right;">
 		<a th:href="@{/j_spring_security_logout}">Logout</a>
 	</div>
-
-	<div>
-		<input id="target" type="text" size="60" style="width: 400px" />
-	</div>
-
-	<script type="text/javascript">
-		var targetStr;
-		if (window.location.protocol == 'http:') {
-			targetStr = 'ws://';
-		} else {
-			targetStr = 'wss://';
-		}
-		targetStr = targetStr + window.location.host + window.location.pathname
-				+ 'ws';
-		document.getElementById('target').value = targetStr;
-	</script>
 
 	<div>
 		<button id="connect" onclick="connect();">Connect</button>
@@ -111,10 +94,11 @@
 	</div>
 
 	<div>
-		<textarea id="message" style="width: 350px"></textarea>
+		<input id="message" type="text" style="width: 400px"></input>
 	</div>
 	<div>
 		<button id="send" onclick="send();" disabled="disabled">Send</button>
+		<label style="padding-left: 10px;">Commands: hello, time.</label>
 	</div>
 
 	<div id="console" />
